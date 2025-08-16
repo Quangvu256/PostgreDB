@@ -1,0 +1,33 @@
+﻿# ---- OS / IDE ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# ---- Secrets / Env ----
+.env
+.env.*
+*.key
+*.pem
+
+# ---- Airflow ----
+# giữ cấu trúc logs nhưng không commit nội dung
+logs/**
+!logs/.gitkeep
+
+# ---- Data tạm / raw (nếu có trên host) ----
+raw_data/**
+!raw_data/.gitkeep
+
+# ---- Docker ----
+docker-compose.override.yml
+# nếu bạn có thư mục bind-mount dữ liệu postgres trên host thì ignore:
+postgres-data/

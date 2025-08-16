@@ -1,0 +1,87 @@
+﻿name: de_weather_project
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_de
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5555:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+  airflow-init:
+    image: apache/airflow:2.8.4-python3.11
+    container_name: airflow_init
+    user: "50000:0"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW_UID: "50000"
+      # Cài provider Postgres
+      PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-postgres==5.*"
+      # Optional: set Variable qua CLI
+      OPENWEATHER_API_KEY: "PUT_YOUR_OPENWEATHER_KEY_HERE"
+    volumes:
+      - "E:/Download/de_weather_project/dags:/opt/airflow/dags"
+      - "E:/Download/de_weather_project/logs:/opt/airflow/logs"
+      - "E:/Download/de_weather_project/plugins:/opt/airflow/plugins"
+    depends_on:
+      - postgres
+    entrypoint: >
+      bash -lc "airflow db migrate &&
+                airflow users create --role Admin --username admin --password admin --firstname Admin --lastname User --email admin@example.com || true &&
+                airflow connections add 'postgres_de_weather' --conn-uri 'postgresql+psycopg2://airflow:airflow@postgres:5432/airflow' || true &&
+                if [ -n \"${OPENWEATHER_API_KEY}\" ]; then airflow variables set OPENWEATHER_API_KEY \"${OPENWEATHER_API_KEY}\"; fi"
+
+  airflow-webserver:
+    image: apache/airflow:2.8.4-python3.11
+    container_name: airflow_webserver
+    user: "50000:0"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW_UID: "50000"
+      PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-postgres==5.*"
+    volumes:
+      - "E:/Download/de_weather_project/dags:/opt/airflow/dags"
+      - "E:/Download/de_weather_project/logs:/opt/airflow/logs"
+      - "E:/Download/de_weather_project/plugins:/opt/airflow/plugins"
+    command: webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - airflow-init
+
+  airflow-scheduler:
+    image: apache/airflow:2.8.4-python3.11
+    container_name: airflow_scheduler
+    user: "50000:0"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW_UID: "50000"
+      PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-postgres==5.*"
+    volumes:
+      - "E:/Download/de_weather_project/dags:/opt/airflow/dags"
+      - "E:/Download/de_weather_project/logs:/opt/airflow/logs"
+      - "E:/Download/de_weather_project/plugins:/opt/airflow/plugins"
+    command: scheduler
+    depends_on:
+      - postgres
+      - airflow-init
+
+volumes:
+  postgres-db:
