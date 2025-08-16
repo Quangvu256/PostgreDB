@@ -47,10 +47,24 @@ Docker và Docker Compose: Cần được cài đặt trên máy của bạn.
 OpenWeatherMap API Key: Đăng ký tài khoản miễn phí tại OpenWeatherMap để lấy API key.
 
 2. Cấu hình dự án
-Mở file .env và thay thế giá trị OPENWEATHER_API_KEY bằng API key của bạn:
+Vì file .env không được commit lên GitHub để bảo mật, bạn cần tạo lại nó từ file mẫu hoặc tạo mới với nội dung sau và thay thế giá trị OPENWEATHER_API_KEY bằng API key của bạn:
+
+# Biến môi trường cho PostgreSQL
+POSTGRES_USER=airflow
+POSTGRES_PASSWORD=airflow
+POSTGRES_DB=airflow
+
+# Biến môi trường cho Airflow
+AIRFLOW_UID=50000 
 
 # API Key của bạn từ OpenWeatherMap
 OPENWEATHER_API_KEY=YOUR_OPENWEATHER_API_KEY_HERE
+
+# Airflow metadata DB dùng Postgres thay vì SQLite
+AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+
+# Chạy LocalExecutor (ổn định hơn cho Docker so với SequentialExecutor)
+AIRFLOW__CORE__EXECUTOR=LocalExecutor
 
 Cập nhật đường dẫn trong file docker-compose.yaml (nếu cần):
 
