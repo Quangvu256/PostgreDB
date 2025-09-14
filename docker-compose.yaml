@@ -30,8 +30,7 @@ services:
       # Cài provider Postgres
       PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-postgres==5.*"
       # Optional: set Variable qua CLI
-      OPENWEATHER_API_KEY: "94794390c48d06937069cffad226db16
-"
+      OPENWEATHER_API_KEY: "PUT YOUR API KEY HERE"
     volumes:
       - "E:/Download/de_weather_project/dags:/opt/airflow/dags"
       - "E:/Download/de_weather_project/logs:/opt/airflow/logs"
